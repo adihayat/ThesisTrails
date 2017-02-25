@@ -2,9 +2,9 @@
 # Adjustable LR base on TrainPathMeasure
 
 Hi , this is the summery of the experiments I've done on adjustable lr base on the TrainPathMeasure we've talked about.<br>
-Bottom line, 0.663 acc compared to the 0.6556 (best trail I got on the baseline)
+Bottom line, 0.6637 acc compared to the 0.6556 (best trail I got on the baseline)
 
-These is the train stats on the 5 phases:
+These are the train stats on the 5 phases:
 in each phase I've changed the Base Lr + did some manual lr adjustment to specific layers based on the TrainPathMeasure (will refer as TPM)
 
 
