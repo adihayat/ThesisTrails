@@ -2,7 +2,7 @@
 # Adjustable LR base on TrainPathMeasure
 
 Hi , this is the summery of the experiments I've done on adjustable lr base on the TrainPathMeasure we've talked about.<br>
-Bottom line, 0.6637 acc compared to the 0.6556 (best trail I got on the baseline)
+Bottom line, 0.6637 acc (in the red /second phase ) compared to the 0.6556 (best trail I got on the baseline)
 
 These are the train stats on the 5 phases:
 in each phase I've changed the Base Lr + did some manual lr adjustment to specific layers based on the TrainPathMeasure (will refer as TPM)
@@ -316,8 +316,9 @@ this flow goes on to the next phase, the flow summery:
 - as you can see the diversity of the TPM is relativly low , meaning most layers have about the same TPM , aside from few layers.<br> this is why in later stages I've started to measure the TPM on kernels of conv layers: (see below)
 
 below you can see the histogram per layer of the TPM on the output channels, for example in conv1_1 there are 2 output channels with TPM ~0.16  and 8 output channels with TPM ~0.26.<br>
-as you can see the stats here have much more diversity, however, in order to exploit this diversity I had to start splittig the conv layers.
-
+as you can see the stats here have much more diversity, however, in order to exploit this diversity I had to start splittig the conv layers.<br>
+looking at conv1_1 TPM per kernel histogram : it shows great diversity , some kernel have 0.15 and some in the same layer have 0.39 which is more then twice<br>
+so conv1_1 is a good cnadidate for a split , in the split and extend trail I took the conv1_1 as a first split yeilding a 65.32 -> 66.1 improvment without any hyperparameters change
 
 ```python
 ! python utils/train_path_hist.py --dep exp/test_lr/baseline/deploy.prototxt  --snapshot_dir exp/test_lr/baseline/snapshots/ --num 15 --range 83000,90000 2>&1 | grep -A 9999 Norm | grep -A 999 conv1_1  
