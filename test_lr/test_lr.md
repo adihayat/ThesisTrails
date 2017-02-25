@@ -1,7 +1,7 @@
 
 # Adjustable LR based on TrainPathMeasure
 
-Hi , this is the summery of the experiments I've done on adjustable lr base on the TrainPathMeasure we've talked about.<br>
+Hi , this is the summery of the experiments I've done on adjustable lr based on the TrainPathMeasure we've talked about.<br>
 Bottom line, 0.6637 acc (in the red /second phase ) compared to the 0.6556 (best trail I got on the baseline)
 
 These are the train stats on the 5 phases:
@@ -16,8 +16,8 @@ in each phase I've changed the Base Lr + did some manual lr adjustment to specif
 ![png](output_3_0.png)
 
 
-these are the TrainPathMeasure through the stages showing all of the layer. (giving more concise summery below):<br>
-`ledgend : path_<measure_window_start_iter>_<measure_window_start_iter> (<layer_name>: <TPM>)`
+these are the TrainPathMeasure through the stages showing all of the layer. (giving more concise summery below on selected layers):<br>
+`legend : path_<measure_window_start_iter>_<measure_window_start_iter> (<layer_name>: <TPM>)`
 
 
 ```python
@@ -178,7 +178,7 @@ these are the TrainPathMeasure through the stages showing all of the layer. (giv
     exp/test_lr/path_263000_270000.log:8774:TrainPathMeasure: ('ip1', 0.32516004252774827)
 
 
-let's review the train path measure on conv1_1,ip,conv2_1
+Let's review the train path measure on conv1_1,ip,conv2_1
 
 
 ```python
@@ -213,12 +213,12 @@ let's review the train path measure on conv1_1,ip,conv2_1
 
 ### Adjustment 1 (Green Stage)
 When the training starts (iters 1000-7000) all of the layers have relatively high TPM<br>
-in iterations 16500-23500 we see that the TPM has decreased significantlly (on conv1_1 from 0.756->0.308)<br> suggesting that the base_lr of 0.01 was exploited -> need to move to a smalled lr <br> 
-all of the layers exhibits the same behavior hence a cross-layer base_lr change is applied<br>
+in iterations 16500-23500 we see that the TPM has decreased significantly (on conv1_1 from 0.756->0.308)<br> suggesting that the base_lr of 0.01 was exploited -> need to move to a smaller lr <br> 
+All of the layers exhibits the same behavior hence a cross-layer base_lr change is applied<br>
 <br>
-additionally we see that the ip,clf (the last two FC layers) are lagging , meaning they both have a lower TPM then the rest of the layers: TPM@conv1_1 = 0.756 , TPM@ip = 0.449 , so we lower the lr_rate at ip,and clf layers<br>
+Additionally we see that the ip,clf (the last two FC layers) are lagging , meaning they both have a lower TPM then the rest of the layers: TPM@conv1_1 = 0.756 , TPM@ip = 0.449 , so we lower the lr_rate at ip,and clf layers<br>
 
-see below for the changes in the train hyperparams
+See below for the changes in the train hyperparams
 
 
 ```python
@@ -301,24 +301,27 @@ see below for the changes in the train hyperparams
 - first we note that measuring the TPM right after the first adjustment (iters 23000 - 30000) 
 we see that overall the TPM is increased (TPM@conv1_1 = 0.308 -> 0.334) showing that with slight fix to the base_lr the training are now "more effective"  
 - measuring the ratio of TPM@ip / TPM@conv1_1 = 0.228 / 0.308 = 0.74 -> 0.2834 / 0.3346 = 0.84 <br>
-so the ratio of the TPM@ip / TPM@conv1_1 got closser to '1' then before due to the layer specific fix the lr
+so the ratio of the TPM@ip / TPM@conv1_1 got closer to '1' then before due to the layer specific lr fix
 
-in the end of the "Adjustment 2 (Red Stage)" at iters (87000-90000) we see that the overall TPM is again reduced (compared to the start of the phase), suggesting to again decrease the base_lr (accross all layers)
+in the end of the "Adjustment 2 (Red Stage)" at iters (87000-90000) we see that the overall TPM is again reduced (compared to the start of the phase), suggesting to again decrease the base_lr (across all layers)
 
 
 this flow goes on to the next phase, the flow summery:
-- when the TPM has lower below X, reduce the base_lr accross all layer (X is a strong function of the measurment window size)
-- if some layers have lower/higher TPM  then the average TPM accross all layers , decrease/increase the layer specific lr
+- when the average layer's TPM is lower below X, reduce the base_lr across all layer (X is a strong function of the measurement window size)
+- if some layers have lower/higher TPM  then the average TPM across all layers , decrease/increase the layer specific lr
 
 ### Notes
 
-- the measurement of the TPM is a strong function of the window size taken, in this test I've taken a window size of 7000 iters which are 11.6 epochs, taking a smaller window size gives high granularity temporal information about the Train path wheareas larger windows size measure the macro statistics of the train. (if we were to take a smaller window size we would have also see higher TPM values)
-- as you can see the diversity of the TPM is relativly low , meaning most layers have about the same TPM , aside from few layers.<br> this is why in later stages I've started to measure the TPM on kernels of conv layers: (see below)
+- the measurement of the TPM is a strong function of the window size taken, in this test I've taken a window size of 7000 iters which are 11.6 epochs, taking a smaller window size gives high granularity temporal information about the Train path whereas larger window size measure the macro statistics of the train. (if we were to take a smaller window size we would have also see higher TPM values)
+- as you can see the diversity of the TPM is relatively low , meaning most layers have about the same TPM , aside from few layers.<br>
+this is why in later stages I've started to measure the TPM on kernels of conv layers: (see below)
 
 below you can see the histogram per layer of the TPM on the output channels, for example in conv1_1 there are 2 output channels with TPM ~0.16  and 8 output channels with TPM ~0.26.<br>
-as you can see the stats here have much more diversity, however, in order to exploit this diversity I had to start splittig the conv layers.<br>
+as you can see the stats here have much more diversity, however, in order to exploit this diversity I had to start splitting the conv layers.<br>
+<br>
+<br>
 looking at conv1_1 TPM per kernel histogram : it shows great diversity , some kernel have 0.15 and some in the same layer have 0.39 which is more then twice<br>
-so conv1_1 is a good cnadidate for a split , in the split and extend trail I took the conv1_1 as a first split yeilding a 65.32 -> 66.1 improvment without any hyperparameters change
+so conv1_1 is a good candidate for a split , in the "split and extend trail" I took the conv1_1 as a first split yielding a 65.32 -> 66.1 improvement without any hyperparameters change
 
 ```python
 ! python utils/train_path_hist.py --dep exp/test_lr/baseline/deploy.prototxt  --snapshot_dir exp/test_lr/baseline/snapshots/ --num 15 --range 83000,90000 2>&1 | grep -A 9999 Norm | grep -A 999 conv1_1  
