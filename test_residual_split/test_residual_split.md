@@ -2,8 +2,8 @@
 # Residual Split experiment
 
 
-Hi , these are the results on the residual split test,
-bottom line, see below results on accuracy per derived net: (showing improvement compared to the previous flow)
+Hi , these are the results on the residual split test.<br>
+see below results on accuracy per derived net: (showing improvement compared to the previous flow)<br>
 
   Net  | Acc
   ------------- | -------------
