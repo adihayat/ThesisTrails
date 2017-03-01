@@ -2,9 +2,6 @@
 # Residual Split experiment
 
 
-<style>.container { width:80% !important; }</style>
-
-
 Hi , these are the results on the residual split test,
 bottom line, see below results on accuracy per derived net: (showing improvement compared to the previous flow)
 
@@ -70,7 +67,7 @@ Derived6  | 0.681701
 ##### baseline
 
 To be more specific, this is the description of the split:<br>
-see below the process of producing the output blob conv1_1 , that is feed to the rest of the net.<br>
+see below the process of producing the output blob conv1_1 , that is fed to the rest of the net.<br>
 in the baseline conv1_1 is a convolution layer applied on the input image: (see below)
 
 
@@ -81,7 +78,7 @@ in the baseline conv1_1 is a convolution layer applied on the input image: (see 
 
 this is how the conv1_1 was produce in the prev(old) split flow:<br>
 conv1_1_split1 are the "fast" kernels (high TPM) , conv1_1_split2 are the "slower" kernels (lower TPM)<br>
-conv1_1_split2 are feed to an "extention" conv layer with kernel size 1,<br>(initialized with identity matrix + noise)<br>
+conv1_1_split2 are fed to an "extention" conv layer with kernel size 1,<br>(initialized with identity matrix + noise)<br>
 the concatenation of conv1_1_split1 , conv1_1_split2_extention is fed to a "reorder" conv layer with kernel size 1<br>(initialized with permuted identity matrix + noise , where the permutation is in order to preserve the previous conv1_1 convolution function)<br>
 NOTE: if the noise in the initialization was zero, network mapping (the network output given an image) after the split was identical to the base network 
 
