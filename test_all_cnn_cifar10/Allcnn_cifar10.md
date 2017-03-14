@@ -100,6 +100,7 @@ Net | Best Acc
 baseline | 90.9
 msplit1  | 92.06
 msplit2  | 92.47
+msplit3  | 92.60
 
 
 
